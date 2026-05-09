@@ -71,8 +71,8 @@
 @media (max-width: 768px) {
   .topbar { padding: 0 12px; height: 60px; }
   .time-block { display: none; }
-  .user-label { font-size: 13px; }
-  .user-name { font-size: 13px; }
+  .user-label { font-size: 1.2vw; }
+  .user-name { font-size: 1.8vw; }
   .active-badge { display: none; }
   .logout-btn { padding: 6px 10px; font-size: 11px; }
 }
