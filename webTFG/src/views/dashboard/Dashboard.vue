@@ -41,4 +41,24 @@ provide('refreshKey', refreshKey)
   gap: 0;
   overflow: hidden;
 }
+/* Tablet (max 1024px) — oculta paneles laterales, solo centro */
+@media (max-width: 1024px) {
+  .dashboard {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+  .main {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+}
+
+/* Móvil (max 768px) */
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+}
 </style>
