@@ -1,15 +1,11 @@
 <template>
   <div class="login-page">
-
-    <!-- Fondo con grid decorativo -->
     <div class="bg-grid"></div>
-
-    <!-- Glow naranja de fondo -->
     <div class="bg-glow"></div>
 
     <div class="login-card">
 
-      <!-- Header con logo del gym -->
+      <!-- Header -->
       <div class="card-header">
         <div class="gym-logo">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -28,24 +24,41 @@
       <div class="card-body">
         <h2 class="form-title">ACCESO AL SISTEMA</h2>
 
+        <!-- Email -->
         <div class="input-group">
           <label class="input-label">CORREO ELECTRÓNICO</label>
-          <div class="input-wrap" :class="{ focused: focusEmail }">
+          <div class="input-wrap" :class="{ focused: focusEmail, invalid: emailDirty && !emailValido }">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M4 4h16v16H4V4zm0 0l8 9 8-9" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>
             <input
-              type="email"
+              type="text"
               v-model="email"
               placeholder="trabajador@gym.com"
               autocomplete="email"
-              @focus="focusEmail = true"
-              @blur="focusEmail = false"
+              @focus="focusEmail = true; emailDirty = false"
+              @blur="focusEmail = false; emailDirty = true"
               @keyup.enter="login"
             />
+            <!-- Icono estado: X roja o check verde -->
+            <span class="status-icon" v-if="emailDirty && email.length > 0">
+              <svg v-if="!emailValido" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="rgba(255,60,60,0.15)" stroke="#ff4060" stroke-width="1.5"/>
+                <path d="M15 9l-6 6M9 9l6 6" stroke="#ff4060" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="rgba(0,230,118,0.12)" stroke="#00e676" stroke-width="1.5"/>
+                <path d="M7.5 12l3 3 6-6" stroke="#00e676" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </div>
+          <!-- Mensaje de error inline -->
+          <span class="field-error" v-if="emailDirty && !emailValido && email.length > 0">
+            Formato inválido — debe ser texto@dominio.ext
+          </span>
         </div>
 
+        <!-- Contraseña -->
         <div class="input-group">
           <label class="input-label">CONTRASEÑA</label>
           <div class="input-wrap" :class="{ focused: focusPass }">
@@ -62,19 +75,37 @@
               @blur="focusPass = false"
               @keyup.enter="login"
             />
+            <!-- Ojo abierto = contraseña visible / Ojo tachado = contraseña oculta -->
             <button class="toggle-pass" type="button" @click="showPass = !showPass" tabindex="-1">
-              {{ showPass ? '🙈' : '👁️' }}
+              <!-- Ojo abierto: se muestra cuando la pass YA ES visible (click la ocultará) -->
+              <svg v-if="showPass" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3"
+                  stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              <!-- Ojo tachado: se muestra cuando la pass está OCULTA (click la mostrará) -->
+              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14.12 14.12a3 3 0 01-4.24-4.24"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="1" y1="1" x2="23" y2="23"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
             </button>
           </div>
         </div>
 
-        <!-- Error -->
+        <!-- Error global del servidor -->
         <div class="error-box" v-if="errorMsg">
           <span class="error-dot"></span>
           {{ errorMsg }}
         </div>
 
-        <button class="btn-login" @click="login" :disabled="loading" :class="{ loading }">
+        <button class="btn-login" @click="login" :disabled="loading">
           <span v-if="!loading">ENTRAR</span>
           <span v-else class="spinner"></span>
         </button>
@@ -92,39 +123,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/api.js'
 
-const email     = ref('')
-const pass      = ref('')
-const errorMsg  = ref('')
-const loading   = ref(false)
-const showPass  = ref(false)
+const email      = ref('')
+const pass       = ref('')
+const errorMsg   = ref('')
+const loading    = ref(false)
+const showPass   = ref(false)
 const focusEmail = ref(false)
 const focusPass  = ref(false)
-const router    = useRouter()
+const emailDirty = ref(false)  // true tras el primer toque/input
+const router     = useRouter()
+
+// Regex estándar: algo@algo.algo (mínimo 2 chars después del punto)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const emailValido = computed(() => EMAIL_REGEX.test(email.value.trim()))
 
 async function login() {
-  errorMsg.value = ''
+  errorMsg.value   = ''
+  emailDirty.value = true  // forzar validación visual al pulsar Entrar
 
   if (!email.value || !pass.value) {
     errorMsg.value = 'Introduce email y contraseña'
+    return
+  }
+  if (!emailValido.value) {
+    errorMsg.value = 'El email no tiene un formato válido'
     return
   }
 
   loading.value = true
   try {
     const { data } = await api.post('/auth/login', {
-      email: email.value,
+      email: email.value.trim(),
       pass:  pass.value
     })
 
     localStorage.setItem('usuario', JSON.stringify({
-      nombre:       data.nombre,
-      email:        data.email,
+      nombre:        data.nombre,
+      email:         data.email,
       id_trabajador: data.id_trabajador,
-      rol:          data.rol
+      rol:           data.rol
     }))
 
     router.push('/dashboard')
@@ -138,270 +179,134 @@ async function login() {
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: #0a0a0b;
-}
+body { font-family: 'DM Sans', sans-serif; background: #0a0a0b; }
 </style>
 
 <style scoped>
-/* ── PAGE ─────────────────────────────────────────────── */
+/* ── PAGE ───────────────────────────────────────────────── */
 .login-page {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0a0a0b;
-  position: relative;
-  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: #0a0a0b; position: relative; overflow: hidden;
+  padding: 20px;
 }
-
-/* Grid decorativo de fondo */
 .bg-grid {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(255,92,0,0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,92,0,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
+  background-size: 40px 40px; pointer-events: none;
 }
-
-/* Glow naranja central */
 .bg-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
   background: radial-gradient(circle, rgba(255,92,0,0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
-/* ── CARD ─────────────────────────────────────────────── */
+/* ── CARD ───────────────────────────────────────────────── */
 .login-card {
-  position: relative;
-  width: 420px;
-  background: #111114;
-  border: 1px solid #1e1e24;
+  position: relative; width: 100%; max-width: 420px;
+  background: #111114; border: 1px solid #1e1e24;
   border-radius: 20px;
   box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,92,0,0.06);
   overflow: hidden;
 }
-
-/* Línea naranja superior */
 .login-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent, #ff5c00 30%, #ff8c00 70%, transparent);
 }
 
-/* ── HEADER ───────────────────────────────────────────── */
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 28px 28px 22px;
-}
-
+/* ── HEADER ─────────────────────────────────────────────── */
+.card-header { display: flex; align-items: center; gap: 16px; padding: 28px 28px 22px; }
 .gym-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: rgba(255,92,0,0.1);
-  border: 1px solid rgba(255,92,0,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,92,0,0.1); border: 1px solid rgba(255,92,0,0.25);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-
 .header-text { display: flex; flex-direction: column; gap: 4px; }
-
-.gym-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
-  letter-spacing: 4px;
-  color: #ffffff;
-  line-height: 1;
-}
-
+.gym-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 4px; color: #ffffff; line-height: 1; }
 .accent { color: #ff5c00; }
+.gym-sub { font-size: 11px; color: #44445a; letter-spacing: 0.5px; }
+.divider { height: 1px; background: linear-gradient(90deg, transparent, #1e1e24 20%, #1e1e24 80%, transparent); margin: 0 28px; }
 
-.gym-sub {
-  font-size: 11px;
-  color: #44445a;
-  letter-spacing: 0.5px;
-  font-weight: 400;
-}
-
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #1e1e24 20%, #1e1e24 80%, transparent);
-  margin: 0 28px;
-}
-
-/* ── BODY ─────────────────────────────────────────────── */
-.card-body {
-  padding: 24px 28px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.form-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px;
-  letter-spacing: 3px;
-  color: #33334a;
-  margin-bottom: 2px;
-}
+/* ── BODY ───────────────────────────────────────────────── */
+.card-body { padding: 24px 28px 20px; display: flex; flex-direction: column; gap: 18px; }
+.form-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 3px; color: #33334a; }
 
 /* Inputs */
 .input-group { display: flex; flex-direction: column; gap: 7px; }
-
-.input-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  color: #44445a;
-  text-transform: uppercase;
-}
+.input-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: #44445a; text-transform: uppercase; }
 
 .input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #16161c;
-  border: 1px solid #1e1e2a;
-  border-radius: 10px;
-  padding: 0 14px;
+  display: flex; align-items: center; gap: 10px;
+  background: #16161c; border: 1px solid #1e1e2a;
+  border-radius: 10px; padding: 0 14px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+.input-wrap.focused { border-color: #ff5c00; box-shadow: 0 0 0 3px rgba(255,92,0,0.08); }
+.input-wrap.invalid { border-color: #ff4060; box-shadow: 0 0 0 3px rgba(255,60,60,0.08); }
+/* si está focused Y inválido, prevalece rojo */
+.input-wrap.focused.invalid { border-color: #ff4060; box-shadow: 0 0 0 3px rgba(255,60,60,0.08); }
 
-.input-wrap.focused {
-  border-color: #ff5c00;
-  box-shadow: 0 0 0 3px rgba(255,92,0,0.08);
-}
-
-.input-icon {
-  color: #33334a;
-  flex-shrink: 0;
-  transition: color 0.2s;
-}
-.input-wrap.focused .input-icon { color: #ff5c00; }
+.input-icon { color: #33334a; flex-shrink: 0; transition: color 0.2s; }
+.input-wrap.focused:not(.invalid) .input-icon { color: #ff5c00; }
+.input-wrap.invalid .input-icon { color: #ff4060; }
 
 .input-wrap input {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  padding: 12px 0;
-  color: #e8e8ee;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
+  flex: 1; background: none; border: none; outline: none;
+  padding: 12px 0; color: #e8e8ee;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
 }
 .input-wrap input::placeholder { color: #2e2e3a; }
 
+/* Icono X / check */
+.status-icon { display: flex; align-items: center; flex-shrink: 0; }
+
+/* Mensaje error bajo el campo */
+.field-error { font-size: 11px; color: #ff4060; padding-left: 2px; }
+
+/* Ojo */
 .toggle-pass {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0;
-  line-height: 1;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  background: none; border: none; cursor: pointer;
+  color: #33334a; padding: 0; line-height: 1;
+  display: flex; align-items: center; flex-shrink: 0;
+  transition: color 0.2s;
 }
-.toggle-pass:hover { opacity: 1; }
+.toggle-pass:hover { color: #ff5c00; }
 
-/* Error */
+/* Error global */
 .error-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,60,60,0.08);
-  border: 1px solid rgba(255,60,60,0.2);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #ff4060;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.2);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #ff4060;
 }
-
-.error-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ff4060;
-  flex-shrink: 0;
-}
+.error-dot { width: 6px; height: 6px; border-radius: 50%; background: #ff4060; flex-shrink: 0; }
 
 /* Botón */
 .btn-login {
-  width: 100%;
-  padding: 14px;
+  width: 100%; padding: 14px;
   background: linear-gradient(135deg, #ff5c00, #ff8c00);
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 3px;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
+  border: none; border-radius: 10px; color: #fff;
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px;
+  cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  margin-top: 4px; display: flex; align-items: center; justify-content: center; min-height: 50px;
 }
-.btn-login:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-.btn-login:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-login:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Spinner */
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── FOOTER ───────────────────────────────────────────── */
+/* FOOTER */
 .card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 28px 20px;
-  border-top: 1px solid #16161c;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 14px 28px 20px; border-top: 1px solid #16161c;
 }
-
-.footer-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #2a2a35;
-}
-
-.footer-text {
-  font-size: 11px;
-  color: #2a2a35;
-  letter-spacing: 0.5px;
-}
+.footer-dot { width: 4px; height: 4px; border-radius: 50%; background: #2a2a35; }
+.footer-text { font-size: 11px; color: #2a2a35; letter-spacing: 0.5px; }
 </style>
