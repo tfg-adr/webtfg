@@ -34,7 +34,7 @@
         <h2 class="section-title" style="margin:0">PLANES</h2>
         <!-- Botón + circular dorado a la DERECHA del título -->
         <button class="add-plan-btn" @click="openModal('addPlan')" title="Añadir plan">
-          <svg width="25" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="24" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <radialGradient id="btnGrad" cx="40%" cy="30%" r="65%">
                 <stop offset="0%"   stop-color="#FFE033"/>
