@@ -196,7 +196,7 @@ function estadoLabel(e) {
 
 // Helpers avatar
 const COLORS = [
-  'linear-gradient(135deg,#ff5c00,#ff8c00)',
+  'linear-gradient(135deg,var(--color-primary),var(--color-primary-light))',
   'linear-gradient(135deg,#6644ff,#9966ff)',
   'linear-gradient(135deg,#00b4d8,#0077b6)',
   'linear-gradient(135deg,#00e676,#00b248)',

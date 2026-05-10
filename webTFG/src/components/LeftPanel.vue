@@ -86,7 +86,7 @@ const stats            = ref([])
 const members          = ref([])
 const ocupacion        = ref({ porcentaje: 0, dentro: 0, aforoMax: 100 })
 
-const COLORS = ['linear-gradient(135deg,#ff5c00,#ff8c00)','linear-gradient(135deg,#6644ff,#9966ff)','linear-gradient(135deg,#00b4d8,#0077b6)','linear-gradient(135deg,#00e676,#00b248)','linear-gradient(135deg,#ff4060,#cc1040)','linear-gradient(135deg,#f7b731,#fc5c65)']
+const COLORS = ['linear-gradient(135deg,var(--color-primary),var(--color-primary-light))','linear-gradient(135deg,#6644ff,#9966ff)','linear-gradient(135deg,#00b4d8,#0077b6)','linear-gradient(135deg,#00e676,#00b248)','linear-gradient(135deg,#ff4060,#cc1040)','linear-gradient(135deg,#f7b731,#fc5c65)']
 function avatarColor(nombre) { let h = 0; for (const c of nombre) h += c.charCodeAt(0); return COLORS[h % COLORS.length] }
 function initials(nombre)    { const p = nombre.trim().split(' '); return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() }
 
@@ -95,7 +95,7 @@ async function fetchStats() {
   try {
     const { data } = await api.get('/dashboard/stats')
     stats.value = [
-      { label: 'Socios totales',   value: data.totalClientes.toLocaleString('es'), trend: '', up: true,  bg: 'rgba(255,92,0,0.15)',    icon: '👥' },
+      { label: 'Socios totales',   value: data.totalClientes.toLocaleString('es'), trend: '', up: true,  bg: 'var(--color-primary-bg-md)',    icon: '👥' },
       { label: 'Ingresos del mes', value: '€' + Number(data.ingresosMes).toLocaleString('es'), trend: '', up: true, bg: 'rgba(0,230,118,0.12)', icon: '💰' },
       { label: 'Vencen hoy',       value: String(data.vencenHoy), trend: '', up: false, bg: 'rgba(255,60,60,0.12)',   icon: '⏰' },
       { label: 'Altas este mes',   value: String(data.altasMes),  trend: '', up: true,  bg: 'rgba(100,100,255,0.12)', icon: '⚡' },

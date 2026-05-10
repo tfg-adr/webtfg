@@ -18,7 +18,7 @@
     <div class="center">
       <div class="gym-logo">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M6 4h2v16H6V4zM16 4h2v16h-2V4zM2 9h4v6H2V9zM18 9h4v6h-4V9zM10 10h4v4h-4v-4z" fill="#ff5c00"/>
+          <path d="M6 4h2v16H6V4zM16 4h2v16h-2V4zM2 9h4v6H2V9zM18 9h4v6h-4V9zM10 10h4v4h-4v-4z" fill="var(--color-primary)"/>
         </svg>
       </div>
       <div class="gym-name-block">
@@ -54,7 +54,7 @@
         <button class="btn-close" @click="showPerfil = false">✕</button>
 
         <div class="profile-header">
-          <div class="profile-avatar" :style="{ background: 'linear-gradient(135deg,#ff5c00,#ff8c00)' }">
+          <div class="profile-avatar" :style="{ background: 'linear-gradient(135deg,var(--color-primary),var(--color-primary-light))' }">
             {{ initials }}
           </div>
           <div class="profile-info">

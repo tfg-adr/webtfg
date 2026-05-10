@@ -21,7 +21,7 @@
 .modal::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, #ff5c00 30%, #ff8c00 70%, transparent);
+  background: linear-gradient(90deg, transparent, var(--color-primary) 30%, var(--color-primary-light) 70%, transparent);
   border-radius: 20px 20px 0 0;
 }
 .btn-close {
@@ -47,7 +47,7 @@
 .profile-name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; color: #fff; margin: 0; line-height: 1.1; }
 .profile-doc  { font-size: 12px; color: #44445a; letter-spacing: 0.5px; }
 .profile-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.badge-plan { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: rgba(255,92,0,0.12); color: #ff5c00; border: 1px solid rgba(255,92,0,0.2); }
+.badge-plan { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--color-primary-bg); color: var(--color-primary); border: 1px solid var(--color-primary-border-sm); }
 .badge-estado { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
 .badge-estado.activa   { background: rgba(0,230,118,0.1);  color: #00e676; }
 .badge-estado.inactiva { background: rgba(255,160,0,0.1);  color: #ffa000; }
@@ -59,10 +59,10 @@
 .data-item { display: flex; flex-direction: column; gap: 3px; background: #16161c; border: 1px solid #1e1e2a; border-radius: 10px; padding: 12px 14px; }
 .data-label { font-size: 10px; font-weight: 600; color: #33334a; letter-spacing: 1px; text-transform: uppercase; }
 .data-value { font-size: 13px; color: #d8d8e8; font-weight: 500; word-break: break-all; }
-.sus-card { background: #16161c; border: 1px solid rgba(255,92,0,0.2); border-radius: 12px; padding: 16px; }
+.sus-card { background: #16161c; border: 1px solid var(--color-primary-border-sm); border-radius: 12px; padding: 16px; }
 .sus-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .sus-plan { font-size: 15px; font-weight: 600; color: #e8e8ee; }
-.sus-precio { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #ff5c00; letter-spacing: 1px; }
+.sus-precio { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--color-primary); letter-spacing: 1px; }
 .sus-data-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
 .sus-data { display: flex; flex-direction: column; gap: 3px; }
 .sus-label { font-size: 9px; font-weight: 600; color: #33334a; letter-spacing: 1px; text-transform: uppercase; }

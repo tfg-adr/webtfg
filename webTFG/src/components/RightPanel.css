@@ -10,21 +10,21 @@
 .empty-msg { color: #44445a; font-size: 12px; text-align: center; margin: 6px 0 0; }
 .action-buttons { display: flex; flex-direction: column; gap: 8px; }
 .action-btn { display: flex; align-items: center; gap: 12px; padding: 13px 14px; background: #16161c; border: 1px solid #1e1e2a; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'DM Sans', sans-serif; }
-.action-btn:hover { border-color: rgba(255,92,0,0.4); background: rgba(255,92,0,0.06); transform: translateX(2px); }
-.action-btn.primary { border-color: rgba(255,92,0,0.3); background: linear-gradient(135deg,rgba(255,92,0,0.1),rgba(255,140,0,0.05)); }
+.action-btn:hover { border-color: var(--color-primary-border-lg); background: var(--color-primary-bg-sm); transform: translateX(2px); }
+.action-btn.primary { border-color: var(--color-primary-border); background: linear-gradient(135deg,var(--color-primary-bg),var(--color-primary-bg-sm)); }
 .action-btn.danger:hover { border-color: rgba(0,230,118,0.4); background: rgba(0,230,118,0.06); }
 .action-icon { font-size: 18px; flex-shrink: 0; }
 .action-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .action-label { font-size: 13px; font-weight: 600; color: #d8d8e8; }
 .action-sub { font-size: 11px; color: #44445a; }
 .action-arrow { color: #33334a; font-size: 14px; transition: color 0.2s; }
-.action-btn:hover .action-arrow { color: #ff5c00; }
+.action-btn:hover .action-arrow { color: var(--color-primary); }
 .plans-list { display: flex; flex-direction: column; gap: 10px; }
 .plan-card { background: #16161c; border: 1px solid #1e1e2a; border-radius: 12px; padding: 14px; }
-.plan-card.featured { border-color: rgba(255,92,0,0.3); }
+.plan-card.featured { border-color: var(--color-primary-border); }
 .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .plan-name { font-size: 13px; font-weight: 600; color: #d8d8e8; }
-.plan-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: rgba(255,92,0,0.15); color: #ff5c00; }
+.plan-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--color-primary-bg-md); color: var(--color-primary); }
 .plan-price { display: flex; align-items: baseline; gap: 3px; margin-bottom: 10px; }
 .plan-amount { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fff; letter-spacing: 1px; }
 .plan-period { font-size: 11px; color: #44445a; }
@@ -54,7 +54,7 @@
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #55556a; text-transform: uppercase; font-family: 'DM Sans', sans-serif; }
 .form-input { background: #16161c; border: 1px solid #1e1e2a; border-radius: 8px; padding: 10px 14px; color: #d8d8e8; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; width: 100%; box-sizing: border-box; }
-.form-input:focus { border-color: #ff5c00; }
+.form-input:focus { border-color: var(--color-primary); }
 .form-input::placeholder { color: #2e2e3a; }
 select.form-input { cursor: pointer; }
 select.form-input option { background: #16161c; }
@@ -63,7 +63,7 @@ select.form-input option { background: #16161c; }
 .toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
 .toggle-pass:hover { opacity: 1; }
 .selected-label { font-size: 12px; color: #00e676; margin: 4px 0 0; }
-.btn-submit { background: #ff5c00; border: none; border-radius: 10px; padding: 12px; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 4px; transition: background 0.2s, transform 0.1s; }
+.btn-submit { background: var(--color-primary); border: none; border-radius: 10px; padding: 12px; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 4px; transition: background 0.2s, transform 0.1s; }
 .btn-submit:hover:not(:disabled) { background: #ff7722; transform: translateY(-1px); }
 .btn-submit:disabled { background: #7a3010; cursor: not-allowed; }
  

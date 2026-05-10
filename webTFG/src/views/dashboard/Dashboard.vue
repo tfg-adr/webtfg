@@ -10,16 +10,22 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, provide, onMounted } from 'vue'
 import TopBar      from '../../components/TopBar.vue'
 import LeftPanel   from '../../components/LeftPanel.vue'
 import CenterPanel from '../../components/CenterPanel.vue'
 import RightPanel  from '../../components/RightPanel.vue'
+import { aplicarTema } from '../../themes.js'
 
 // Contador global de refresco. Cada vez que RightPanel hace una acción
 // con éxito lo incrementa, y LeftPanel/CenterPanel lo escuchan con watch.
 const refreshKey = ref(0)
 provide('refreshKey', refreshKey)
+
+onMounted(() => {
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
+  aplicarTema(usuario.id_gym)
+})
 </script>
 
 <style scoped>

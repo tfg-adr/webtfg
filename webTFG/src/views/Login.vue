@@ -165,7 +165,8 @@ async function login() {
       nombre:        data.nombre,
       email:         data.email,
       id_trabajador: data.id_trabajador,
-      rol:           data.rol
+      rol:           data.rol,
+      id_gym:        data.id_gym
     }))
 
     router.push('/dashboard')

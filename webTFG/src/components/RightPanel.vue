@@ -37,9 +37,9 @@
           <svg width="25" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <radialGradient id="btnGrad" cx="40%" cy="30%" r="65%">
-                <stop offset="0%"   stop-color="#FFE033"/>
-                <stop offset="50%"  stop-color="#FFB800"/>
-                <stop offset="100%" stop-color="#E07B00"/>
+                <stop offset="0%"   stop-color="var(--color-primary-light)"/>
+                <stop offset="50%"  stop-color="var(--color-primary)"/>
+                <stop offset="100%" stop-color="var(--color-primary)"/>
               </radialGradient>
               <radialGradient id="shine" cx="38%" cy="22%" r="40%">
                 <stop offset="0%"   stop-color="rgba(255,255,255,0.55)"/>
@@ -342,7 +342,7 @@ async function fetchGymId() {
 }
 
 const planes = ref([])
-const PLAN_COLORS = ['#ff5c00', '#6644ff', '#00e676', '#00b4d8', '#ffa000']
+const PLAN_COLORS = ['var(--color-primary)', '#6644ff', '#00e676', '#00b4d8', '#ffa000']
 const planColor = (i) => PLAN_COLORS[i % PLAN_COLORS.length]
 
 const planesActivos   = computed(() => planes.value.filter(p =>  p.isActive))
@@ -526,7 +526,7 @@ onMounted(() => { fetchGymId(); fetchPlanes(); fetchAlertas() })
 .pass-wrap { position: relative; display: flex; align-items: center; }
 .pass-wrap .form-input { padding-right: 42px; }
 .toggle-pass { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #33334a; padding: 0; display: flex; align-items: center; transition: color 0.2s; }
-.toggle-pass:hover { color: #ff5c00; }
+.toggle-pass:hover { color: var(--color-primary); }
 
 /* ── CABECERA PLANES ──────────────────────────────────── */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -552,7 +552,7 @@ onMounted(() => { fetchGymId(); fetchPlanes(); fetchAlertas() })
 .plans-dropdown summary::-webkit-details-marker { display: none; }
 
 .plan-action { margin-top: 12px; width: 100%; background: #1e1e2a; border: 1px solid #2b2b38; color: #d8d8e8; border-radius: 8px; padding: 9px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-.plan-action:hover        { border-color: #ff5c00; color: #ff5c00; }
+.plan-action:hover        { border-color: var(--color-primary); color: var(--color-primary); }
 .plan-action.danger:hover { border-color: #ff4060; color: #ff4060; }
 .inactive-actions { display: flex; gap: 8px; }
 </style>

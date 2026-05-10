@@ -56,7 +56,7 @@
         <div class="bar-chart">
           <div class="bar-group" v-for="b in barData" :key="b.month">
             <div class="bar-wrap">
-              <div class="bar-fill" :style="{ height: b.pct + '%', background: b.active ? 'linear-gradient(180deg,#ff8c00,#ff5c00)' : '#1e1e2a' }"></div>
+              <div class="bar-fill" :style="{ height: b.pct + '%', background: b.active ? 'linear-gradient(180deg,var(--color-primary-light),var(--color-primary))' : '#1e1e2a' }"></div>
             </div>
             <span class="bar-label">{{ b.month }}</span>
           </div>
@@ -353,7 +353,7 @@ function cambiarPagina(p) {
 }
 
 // ── Helpers avatar ────────────────────────────────────────
-const COLORS = ['linear-gradient(135deg,#ff5c00,#ff8c00)','linear-gradient(135deg,#6644ff,#9966ff)','linear-gradient(135deg,#00b4d8,#0077b6)','linear-gradient(135deg,#00e676,#00b248)','linear-gradient(135deg,#ff4060,#cc1040)']
+const COLORS = ['linear-gradient(135deg,var(--color-primary),var(--color-primary-light))','linear-gradient(135deg,#6644ff,#9966ff)','linear-gradient(135deg,#00b4d8,#0077b6)','linear-gradient(135deg,#00e676,#00b248)','linear-gradient(135deg,#ff4060,#cc1040)']
 function avatarColor(n) { let h = 0; for (const c of n) h += c.charCodeAt(0); return COLORS[h % COLORS.length] }
 function initials(n)    { const p = n.trim().split(' '); return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() }
 
@@ -408,7 +408,11 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 .filtro-btn:hover  { color: #d8d8e8; border-color: #2e2e3e; }
-.filtro-btn.active { background: rgba(255,92,0,0.12); border-color: rgba(255,92,0,0.35); color: #ff5c00; }
+.filtro-btn.active { 
+  background: var(--color-primary-bg); 
+  border-color: var(--color-primary-border); 
+  color: var(--color-primary); 
+}
 
 .clientes-meta { font-size: 12px; color: #33334a; }
 
@@ -427,7 +431,7 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 .clientes-search::placeholder { color: #2e2e3a; }
-.clientes-search:focus { border-color: #ff5c00; }
+.clientes-search:focus { border-color: var(--color-primary); }
 
 /* Lista de clientes */
 .clientes-list {
@@ -449,8 +453,8 @@ onMounted(async () => {
   transition: all 0.18s;
 }
 .cliente-row:hover {
-  border-color: rgba(255,92,0,0.3);
-  background: rgba(255,92,0,0.04);
+  border-color: var(--color-primary-border);
+  background: var(--color-primary-bg-sm);
   transform: translateX(2px);
 }
 
@@ -476,7 +480,7 @@ onMounted(async () => {
   display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
   min-width: 100px; flex-shrink: 0;
 }
-.cliente-plan     { font-size: 11px; font-weight: 600; color: #ff5c00; }
+.cliente-plan     { font-size: 11px; font-weight: 600; color: var(--color-primary); }
 .cliente-sin-plan { font-size: 11px; color: #33334a; }
 .cliente-vence    { font-size: 10px; color: #44445a; }
 .cliente-vence.warn { color: #ffa000; }
@@ -512,8 +516,13 @@ onMounted(async () => {
   transition: all 0.2s;
   min-width: 32px;
 }
-.page-btn:hover:not(:disabled) { border-color: #ff5c00; color: #ff5c00; }
-.page-btn.active { background: rgba(255,92,0,0.12); border-color: rgba(255,92,0,0.4); color: #ff5c00; font-weight: 700; }
+.page-btn:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+.page-btn.active {
+  background: var(--color-primary-bg); 
+  border-color: var(--color-primary-border-lg); 
+  color: var(--color-primary); 
+  font-weight: 700;
+}
 .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Skeleton */
