@@ -54,6 +54,109 @@
 .btn-logout-modal { width: 100%; padding: 11px; background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; color: #ff4060; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .btn-logout-modal:hover { background: rgba(255,60,60,0.15); border-color: rgba(255,60,60,0.4); }
  
+/* ── SETTINGS ─────────────────────────────────────────── */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-wrap { position: relative; }
+
+.settings-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: #16161c;
+  border: 1px solid #1e1e2a;
+  color: #44445a;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.settings-btn:hover,
+.settings-btn.active {
+  border-color: var(--color-primary-border);
+  color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 200px;
+  background: #16161c;
+  border: 1px solid #2a2a35;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 500;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; width: 100%;
+  background: none; border: none;
+  color: #b0b0c0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+.dropdown-item:hover { background: #1e1e2a; color: var(--color-primary); }
+
+.dropdown-divider { height: 1px; background: #1e1e24; }
+
+/* ── MODAL APARIENCIA ─────────────────────────────────── */
+.modal-apariencia {
+  position: relative;
+  width: 400px; max-width: 95vw;
+  background: #111114;
+  border: 1px solid #1e1e24;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+}
+.modal-apariencia::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary) 30%, var(--color-primary-light) 70%, transparent);
+  border-radius: 20px 20px 0 0;
+}
+.apariencia-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: #fff; margin: 0 0 6px; }
+.apariencia-sub { font-size: 12px; color: #44445a; margin: 0 0 24px; }
+.temas-grid { display: flex; flex-direction: column; gap: 10px; }
+.tema-card { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: #16161c; border: 1px solid #1e1e2a; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+.tema-card:hover { border-color: var(--color-primary-border); background: var(--color-primary-bg); }
+.tema-card.selected { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.tema-preview { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+.tema-info { display: flex; align-items: center; justify-content: space-between; flex: 1; }
+.tema-nombre { font-size: 14px; font-weight: 600; color: #d8d8e8; }
+.tema-check { font-size: 16px; color: var(--color-primary); font-weight: 700; }
+
+/* ── MODAL ACERCA DE ──────────────────────────────────── */
+.modal-acerca {
+  position: relative;
+  width: 360px; max-width: 95vw;
+  background: #111114;
+  border: 1px solid #1e1e24;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+  text-align: center;
+}
+.modal-acerca::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary) 30%, var(--color-primary-light) 70%, transparent);
+  border-radius: 20px 20px 0 0;
+}
+.acerca-logo { display: flex; justify-content: center; margin-bottom: 16px; }
+.acerca-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; color: #fff; margin: 0 0 6px; }
+.acerca-version { font-size: 12px; color: var(--color-primary); font-weight: 600; margin: 0 0 14px; }
+.acerca-desc { font-size: 13px; color: #55556a; margin: 0 0 20px; line-height: 1.6; }
+.acerca-divider { height: 1px; background: #1e1e24; margin: 0 0 16px; }
+.acerca-copy { font-size: 11px; color: #33334a; margin: 0; }
  
 /* ── MEDIA QUERIES ─────────────────────────────────────── */
  
