@@ -27,7 +27,6 @@
         <div class="skeleton tall" v-for="i in 5" :key="i"></div>
       </div>
       <div class="members-list" v-else>
-        <!-- ↓ @click abre el modal de perfil -->
         <div class="member-row" v-for="m in members" :key="m.id" @click="abrirPerfil(m.id)">
           <div class="member-avatar" :style="{ background: avatarColor(m.nombre) }">
             {{ initials(m.nombre) }}
@@ -78,6 +77,11 @@ watch(refreshKey, () => { fetchStats(); fetchMembers(); fetchOcupacion() })
 const perfilId = ref(null)
 function abrirPerfil(id) { perfilId.value = id }
 
+// ── Helper sesión ─────────────────────────────────────────
+function getUsuario() {
+  return JSON.parse(localStorage.getItem('usuario') || '{}')
+}
+
 // ── Data ──────────────────────────────────────────────────
 const loadingStats     = ref(true)
 const loadingMembers   = ref(true)
@@ -86,33 +90,63 @@ const stats            = ref([])
 const members          = ref([])
 const ocupacion        = ref({ porcentaje: 0, dentro: 0, aforoMax: 100 })
 
-const COLORS = ['linear-gradient(135deg,var(--color-primary),var(--color-primary-light))','linear-gradient(135deg,#6644ff,#9966ff)','linear-gradient(135deg,#00b4d8,#0077b6)','linear-gradient(135deg,#00e676,#00b248)','linear-gradient(135deg,#ff4060,#cc1040)','linear-gradient(135deg,#f7b731,#fc5c65)']
-function avatarColor(nombre) { let h = 0; for (const c of nombre) h += c.charCodeAt(0); return COLORS[h % COLORS.length] }
-function initials(nombre)    { const p = nombre.trim().split(' '); return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() }
+const COLORS = [
+  'linear-gradient(135deg,var(--color-primary),var(--color-primary-light))',
+  'linear-gradient(135deg,#6644ff,#9966ff)',
+  'linear-gradient(135deg,#00b4d8,#0077b6)',
+  'linear-gradient(135deg,#00e676,#00b248)',
+  'linear-gradient(135deg,#ff4060,#cc1040)',
+  'linear-gradient(135deg,#f7b731,#fc5c65)'
+]
+function avatarColor(nombre) {
+  let h = 0
+  for (const c of nombre) h += c.charCodeAt(0)
+  return COLORS[h % COLORS.length]
+}
+function initials(nombre) {
+  const p = nombre.trim().split(' ')
+  return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase()
+}
 
 async function fetchStats() {
   loadingStats.value = true
   try {
-    const { data } = await api.get('/dashboard/stats')
+    const { id_gym, id_compania } = getUsuario()
+    const { data } = await api.get('/dashboard/stats', {
+      params: { idGym: id_gym, idCompania: id_compania }
+    })
     stats.value = [
       { label: 'Socios totales',   value: data.totalClientes.toLocaleString('es'), trend: '', up: true,  bg: 'var(--color-primary-bg-md)',    icon: '👥' },
-      { label: 'Ingresos del mes', value: '€' + Number(data.ingresosMes).toLocaleString('es'), trend: '', up: true, bg: 'rgba(0,230,118,0.12)', icon: '💰' },
+      { label: 'Ingresos del mes', value: '€' + Number(data.ingresosMes).toLocaleString('es'), trend: '', up: true,  bg: 'rgba(0,230,118,0.12)',      icon: '💰' },
       { label: 'Vencen hoy',       value: String(data.vencenHoy), trend: '', up: false, bg: 'rgba(255,60,60,0.12)',   icon: '⏰' },
       { label: 'Altas este mes',   value: String(data.altasMes),  trend: '', up: true,  bg: 'rgba(100,100,255,0.12)', icon: '⚡' },
     ]
-  } catch (e) { console.error(e) } finally { loadingStats.value = false }
+  } catch (e) { console.error(e) }
+  finally { loadingStats.value = false }
 }
 
 async function fetchMembers() {
   loadingMembers.value = true
-  try { const { data } = await api.get('/dashboard/miembros-recientes'); members.value = data }
-  catch (e) { console.error(e) } finally { loadingMembers.value = false }
+  try {
+    const { id_gym, id_compania } = getUsuario()
+    const { data } = await api.get('/dashboard/miembros-recientes', {
+      params: { idGym: id_gym, idCompania: id_compania }
+    })
+    members.value = data
+  } catch (e) { console.error(e) }
+  finally { loadingMembers.value = false }
 }
 
 async function fetchOcupacion() {
   loadingOcupacion.value = true
-  try { const { data } = await api.get('/dashboard/ocupacion'); ocupacion.value = data }
-  catch (e) { console.error(e) } finally { loadingOcupacion.value = false }
+  try {
+    const { id_gym, id_compania } = getUsuario()
+    const { data } = await api.get('/dashboard/ocupacion', {
+      params: { idGym: id_gym, idCompania: id_compania }
+    })
+    ocupacion.value = data
+  } catch (e) { console.error(e) }
+  finally { loadingOcupacion.value = false }
 }
 
 onMounted(() => { fetchStats(); fetchMembers(); fetchOcupacion() })

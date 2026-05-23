@@ -32,7 +32,6 @@
     <div class="section">
       <div class="section-header">
         <h2 class="section-title" style="margin:0">PLANES</h2>
-        <!-- Botón + circular dorado a la DERECHA del título -->
         <button class="add-plan-btn" @click="openModal('addPlan')" title="Añadir plan">
           <svg width="25" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -55,7 +54,6 @@
         </button>
       </div>
 
-      <!-- ACTIVOS -->
       <details open class="plans-dropdown">
         <summary>Planes activos ({{ planesActivos.length }})</summary>
         <div class="plans-list">
@@ -79,7 +77,6 @@
         </div>
       </details>
 
-      <!-- INACTIVOS -->
       <details class="plans-dropdown">
         <summary>Planes inactivos ({{ planesInactivos.length }})</summary>
         <div class="plans-list">
@@ -94,7 +91,7 @@
             <div class="plan-count-text">{{ plan.miembros }} socios activos</div>
             <div class="inactive-actions">
               <button class="plan-action" @click="activatePlan(plan.id)">Reactivar</button>
-              <button class="plan-action danger" @click="deletePlan(plan.id)">Borrar</button>
+              <button class="plan-action danger" @click="pedirConfirmacionBorrar(plan)">Borrar</button>
             </div>
           </div>
         </div>
@@ -131,7 +128,7 @@
       </div>
     </div>
 
-    <!-- ═══════════ MODAL ═══════════ -->
+    <!-- ═══════════ MODAL PRINCIPAL ═══════════ -->
     <div class="modal-overlay" v-if="modal">
       <div class="modal">
         <div class="modal-header">
@@ -203,7 +200,7 @@
           <template v-if="modal === 'renew'">
             <div class="form-group">
               <label class="form-label">Buscar socio *</label>
-              <SearchCliente :id-gym="gymId" @seleccionado="seleccionarCliente" />
+              <SearchCliente @seleccionado="seleccionarCliente" />
               <p class="selected-label" v-if="form.id_cliente">✓ <strong>{{ form.nombreCliente }}</strong></p>
               <span class="field-error" v-if="dirty.cliente && !form.id_cliente">Selecciona un socio de la lista</span>
             </div>
@@ -324,6 +321,43 @@
       </div>
     </div>
 
+    <!-- ═══════════ MODAL CONFIRMAR BORRAR PLAN ═══════════ -->
+    <Teleport to="body">
+      <div class="modal-overlay" v-if="planABorrar">
+        <div class="modal modal-confirm">
+          <div class="modal-header">
+            <h3 class="modal-title">Eliminar plan</h3>
+            <button class="modal-close" @click="planABorrar = null">✕</button>
+          </div>
+          <div class="modal-body">
+            <template v-if="planABorrar.miembros > 0">
+              <div class="confirm-icon warn">⚠</div>
+              <p class="confirm-msg">
+                No se puede eliminar el plan <strong>{{ planABorrar.nombre }}</strong>
+                porque tiene <strong>{{ planABorrar.miembros }} socios activos</strong>.
+              </p>
+              <p class="confirm-sub">Espera a que venzan sus suscripciones antes de eliminarlo.</p>
+              <button class="btn-submit" @click="planABorrar = null">Entendido</button>
+            </template>
+            <template v-else>
+              <div class="confirm-icon danger">🗑</div>
+              <p class="confirm-msg">
+                ¿Seguro que quieres eliminar el plan <strong>{{ planABorrar.nombre }}</strong>?
+              </p>
+              <p class="confirm-sub">Esta acción no se puede deshacer.</p>
+              <div class="confirm-actions">
+                <button class="btn-cancel" @click="planABorrar = null">Cancelar</button>
+                <button class="btn-delete" @click="confirmarBorrar" :disabled="borrando">
+                  {{ borrando ? 'Eliminando...' : 'Sí, eliminar' }}
+                </button>
+              </div>
+              <div class="modal-feedback error" v-if="errorBorrar">✗ {{ errorBorrar }}</div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </div>
 </template>
 
@@ -332,13 +366,20 @@ import { ref, computed, inject, onMounted } from 'vue'
 import api from '../api/api.js'
 import SearchCliente from './SearchCliente.vue'
 
+// ── Helper sesión ─────────────────────────────────────────
+function getUsuario() {
+  return JSON.parse(localStorage.getItem('usuario') || '{}')
+}
+
 const refreshKey = inject('refreshKey')
 function triggerRefresh() { modal.value = null; refreshKey.value++ }
 
 const gymId = ref(null)
 async function fetchGymId() {
-  try { const { data } = await api.get('/gym/info'); gymId.value = data.id_gym }
-  catch { /* silencioso */ }
+  try {
+    const { data } = await api.get('/gym/info', { params: { id_trabajador: getUsuario().id_trabajador } })
+    gymId.value = data.id_gym
+  } catch {  }
 }
 
 const planes = ref([])
@@ -349,8 +390,11 @@ const planesActivos   = computed(() => planes.value.filter(p =>  p.isActive))
 const planesInactivos = computed(() => planes.value.filter(p => !p.isActive))
 
 async function fetchPlanes() {
-  try { const { data } = await api.get('/plan'); planes.value = [...data].sort((a, b) => b.miembros - a.miembros) }
-  catch { /* silencioso */ }
+  try {
+    const { id_compania } = getUsuario()
+    const { data } = await api.get('/plan', { params: { idCompania: id_compania } })
+    planes.value = [...data].sort((a, b) => b.miembros - a.miembros)
+  } catch { }
 }
 
 async function deactivatePlan(id) {
@@ -361,18 +405,38 @@ async function activatePlan(id) {
   try { await api.put(`/plan/${id}/activate`); await fetchPlanes() }
   catch (e) { alert(e.response?.data?.message || 'No se pudo activar') }
 }
-async function deletePlan(id) {
-  const plan = planesInactivos.value.find(p => p.id === id)
-  if (plan?.miembros > 0) { alert('No se puede borrar: el plan tiene socios activos'); return }
-  if (!confirm(`¿Seguro que quieres eliminar este plan? Esta acción no se puede deshacer.`)) return
-  try { await api.delete(`/plan/${id}`); await fetchPlanes() }
-  catch (e) { alert(e.response?.data?.message || 'No se puede borrar este plan') }
+
+const planABorrar  = ref(null)
+const borrando     = ref(false)
+const errorBorrar  = ref('')
+
+function pedirConfirmacionBorrar(plan) {
+  errorBorrar.value = ''
+  planABorrar.value = plan
+}
+
+async function confirmarBorrar() {
+  borrando.value    = true
+  errorBorrar.value = ''
+  try {
+    await api.delete(`/plan/${planABorrar.value.id}`)
+    planABorrar.value = null
+    await fetchPlanes()
+  } catch (e) {
+    errorBorrar.value = e.response?.data?.message ?? 'No se puede borrar este plan'
+  } finally {
+    borrando.value = false
+  }
 }
 
 const alertas = ref({ vencidas: 0, vencenHoy: 0, altasMes: 0 })
 async function fetchAlertas() {
   try {
-    const [stats, resumen] = await Promise.all([api.get('/dashboard/stats'), api.get('/suscripcion/resumen')])
+    const { id_gym, id_compania } = getUsuario()                               // ← añadido
+    const [stats, resumen] = await Promise.all([
+      api.get('/dashboard/stats', { params: { idGym: id_gym, idCompania: id_compania } }),  // ← params
+      api.get('/suscripcion/resumen')
+    ])
     alertas.value = { vencenHoy: stats.data.vencenHoy, altasMes: stats.data.altasMes, vencidas: resumen.data.vencidas }
   } catch { /* silencioso */ }
 }
@@ -473,9 +537,12 @@ async function submitModal() {
   try {
     if (modal.value === 'add') {
       await api.post('/cliente', {
-        nombre: form.value.nombre, documento_identidad: form.value.documento,
-        pass: form.value.pass, email: form.value.email || null,
-        telefono: form.value.telefono || null, id_plan: form.value.id_plan || null,
+        nombre:              form.value.nombre,
+        documento_identidad: form.value.documento,
+        pass:                form.value.pass,
+        email:               form.value.email    || null,
+        telefono:            form.value.telefono || null,
+        id_plan:             form.value.id_plan  || null,
       })
     }
     if (modal.value === 'renew') {
@@ -483,21 +550,24 @@ async function submitModal() {
     }
     if (modal.value === 'edit') {
       await api.put(`/cliente/${form.value.id_cliente}`, {
-        nombre: form.value.nombre || null, email: form.value.email || null,
-        telefono: form.value.telefono || null, pass: form.value.pass || null,
+        nombre:   form.value.nombre   || null,
+        email:    form.value.email    || null,
+        telefono: form.value.telefono || null,
+        pass:     form.value.pass     || null,
       })
     }
     if (modal.value === 'checkin') {
       await api.post('/registroentrada/checkin', { busqueda: form.value.nombreCliente })
     }
     if (modal.value === 'addPlan') {
+      const { id_compania } = getUsuario()                                     // ← dinámico
       await api.post('/plan', {
         nombre:        form.value.nombre,
         precio:        Number(form.value.precio),
         duracion_dias: Number(form.value.duracion_dias),
         total_accesos: Number(form.value.total_accesos) || 0,
         tipo:          form.value.tipo,
-        id_compania:   1,
+        id_compania:   id_compania,                                            // ← era 1 hardcodeado
       })
       await fetchPlanes()
     }
@@ -517,42 +587,37 @@ onMounted(() => { fetchGymId(); fetchPlanes(); fetchAlertas() })
 <style scoped>
 @import './RightPanel.css';
 
-/* ── VALIDACIONES ─────────────────────────────────────── */
 .input-error { border-color: #ff4060 !important; box-shadow: 0 0 0 3px rgba(255,60,60,0.08) !important; }
 .wrap-error .form-input { border-color: #ff4060 !important; box-shadow: 0 0 0 3px rgba(255,60,60,0.08) !important; }
 .field-error { font-size: 11px; color: #ff4060; padding-left: 2px; margin-top: -2px; }
 
-/* ── OJO ──────────────────────────────────────────────── */
 .pass-wrap { position: relative; display: flex; align-items: center; }
 .pass-wrap .form-input { padding-right: 42px; }
 .toggle-pass { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #33334a; padding: 0; display: flex; align-items: center; transition: color 0.2s; }
 .toggle-pass:hover { color: var(--color-primary); }
 
-/* ── CABECERA PLANES ──────────────────────────────────── */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 
-/* ── BOTÓN + CIRCULAR DORADO ──────────────────────────── */
-.add-plan-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s, filter 0.15s;
-  border-radius: 50%;
-  margin-right: 175px;
-}
+.add-plan-btn { background: none; border: none; padding: 0; cursor: pointer; align-items: center; justify-content: center; transition: transform 0.15s, filter 0.15s; border-radius: 50%; margin-right: 175px; }
 .add-plan-btn:hover  { transform: scale(1.08); filter: brightness(1.1); }
 .add-plan-btn:active { transform: scale(0.95); filter: brightness(0.95); }
 
-/* ── DESPLEGABLES PLANES ──────────────────────────────── */
 .plans-dropdown { margin-bottom: 12px; background: #16161c; border: 1px solid #1e1e2a; border-radius: 12px; overflow: hidden; }
 .plans-dropdown summary { cursor: pointer; list-style: none; padding: 14px; color: #d8d8e8; font-size: 14px; font-weight: 600; }
 .plans-dropdown summary::-webkit-details-marker { display: none; }
-
 .plan-action { margin-top: 12px; width: 100%; background: #1e1e2a; border: 1px solid #2b2b38; color: #d8d8e8; border-radius: 8px; padding: 9px; font-size: 12px; cursor: pointer; transition: 0.2s; }
 .plan-action:hover        { border-color: var(--color-primary); color: var(--color-primary); }
 .plan-action.danger:hover { border-color: #ff4060; color: #ff4060; }
 .inactive-actions { display: flex; gap: 8px; }
+
+.modal-confirm { max-width: 360px; }
+.confirm-icon { font-size: 36px; text-align: center; margin-bottom: 12px; }
+.confirm-msg { font-size: 14px; color: #d8d8e8; text-align: center; margin-bottom: 8px; line-height: 1.5; }
+.confirm-sub { font-size: 12px; color: #55556a; text-align: center; margin-bottom: 20px; }
+.confirm-actions { display: flex; gap: 10px; }
+.btn-cancel { flex: 1; padding: 11px; background: #1e1e2a; border: 1px solid #2b2b38; border-radius: 10px; color: #d8d8e8; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn-cancel:hover { border-color: #44445a; }
+.btn-delete { flex: 1; padding: 11px; background: rgba(255,60,60,0.12); border: 1px solid rgba(255,60,60,0.3); border-radius: 10px; color: #ff4060; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-delete:hover:not(:disabled) { background: rgba(255,60,60,0.22); }
+.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

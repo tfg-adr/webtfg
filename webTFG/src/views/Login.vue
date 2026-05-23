@@ -161,13 +161,14 @@ async function login() {
       pass:  pass.value
     })
 
-    localStorage.setItem('usuario', JSON.stringify({
-      nombre:        data.nombre,
-      email:         data.email,
-      id_trabajador: data.id_trabajador,
-      rol:           data.rol,
-      id_gym:        data.id_gym
-    }))
+  localStorage.setItem('usuario', JSON.stringify({
+    nombre:        data.nombre,
+    email:         data.email,
+    id_trabajador: data.id_trabajador,
+    rol:           data.rol,
+    id_gym:        data.id_gym,
+    id_compania:   data.id_compania   // ← añade esto
+  }))
 
     router.push('/dashboard')
   } catch (err) {
