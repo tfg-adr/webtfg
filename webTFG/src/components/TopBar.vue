@@ -1,9 +1,7 @@
 <template>
   <div class="topbar">
 
-    <!-- Left: trabajador → click abre modal de perfil + rueda ajustes -->
     <div class="left-section">
-
       <div class="left clickable" @click="abrirPerfil">
         <div class="avatar">
           <span class="avatar-initials">{{ initials }}</span>
@@ -15,7 +13,7 @@
         </div>
         <span class="profile-hint">ver perfil →</span>
       </div>
-      <!-- Rueda de ajustes -->
+
       <div class="settings-wrap" ref="settingsRef">
         <button class="settings-btn" @click="toggleSettings" :class="{ active: showSettings }">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -24,7 +22,6 @@
           </svg>
         </button>
 
-        <!-- Dropdown -->
         <div class="settings-dropdown" v-if="showSettings">
           <button class="dropdown-item" @click="abrirApariencia">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -43,10 +40,8 @@
           </button>
         </div>
       </div>
+    </div>
 
-  </div>  
-
-    <!-- Center: nombre del gym desde BD -->
     <div class="center">
       <div class="gym-logo">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -64,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Right: reloj + activos + logout -->
     <div class="right">
       <div class="time-block">
         <span class="time">{{ clock }}</span>
@@ -84,7 +78,6 @@
     <div class="overlay" v-if="showPerfil" @click.self="showPerfil = false">
       <div class="modal-perfil">
         <button class="btn-close" @click="showPerfil = false">✕</button>
-
         <div class="profile-header">
           <div class="profile-avatar" :style="{ background: 'linear-gradient(135deg,var(--color-primary),var(--color-primary-light))' }">
             {{ initials }}
@@ -95,61 +88,33 @@
             <span class="profile-email">{{ usuario.email ?? '—' }}</span>
           </div>
         </div>
-
         <div class="divider"></div>
-
         <div class="p-section">
           <h3 class="p-section-title">DATOS DEL TRABAJADOR</h3>
           <div class="data-grid">
-            <div class="data-item">
-              <span class="data-label">Nombre</span>
-              <span class="data-value">{{ nombreUsuario }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">Rol</span>
-              <span class="data-value">{{ rolLabel }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">Email</span>
-              <span class="data-value">{{ usuario.email ?? '—' }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">ID trabajador</span>
-              <span class="data-value">#{{ usuario.id_trabajador }}</span>
-            </div>
+            <div class="data-item"><span class="data-label">Nombre</span><span class="data-value">{{ nombreUsuario }}</span></div>
+            <div class="data-item"><span class="data-label">Rol</span><span class="data-value">{{ rolLabel }}</span></div>
+            <div class="data-item"><span class="data-label">Email</span><span class="data-value">{{ usuario.email ?? '—' }}</span></div>
+            <div class="data-item"><span class="data-label">ID trabajador</span><span class="data-value">#{{ usuario.id_trabajador }}</span></div>
           </div>
         </div>
-
         <div class="divider"></div>
-
         <div class="p-section">
           <h3 class="p-section-title">GYM ASIGNADO</h3>
           <div class="data-grid">
-            <div class="data-item">
-              <span class="data-label">Nombre</span>
-              <span class="data-value">{{ gymInfo.nombre || '—' }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">Ciudad</span>
-              <span class="data-value">{{ gymInfo.ciudad || '—' }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">Compañía</span>
-              <span class="data-value">{{ gymInfo.compania || '—' }}</span>
-            </div>
-            <div class="data-item">
-              <span class="data-label">Activos ahora</span>
-              <span class="data-value accent-green">{{ gymInfo.activosHoy }}</span>
-            </div>
+            <div class="data-item"><span class="data-label">Nombre</span><span class="data-value">{{ gymInfo.nombre || '—' }}</span></div>
+            <div class="data-item"><span class="data-label">Ciudad</span><span class="data-value">{{ gymInfo.ciudad || '—' }}</span></div>
+            <div class="data-item"><span class="data-label">Compañía</span><span class="data-value">{{ gymInfo.compania || '—' }}</span></div>
+            <div class="data-item"><span class="data-label">Activos ahora</span><span class="data-value accent-green">{{ gymInfo.activosHoy }}</span></div>
           </div>
         </div>
-
         <div class="p-footer">
           <button class="btn-logout-modal" @click="logout">Cerrar sesión</button>
         </div>
       </div>
     </div>
   </Teleport>
+
   <!-- Modal apariencia -->
   <Teleport to="body">
     <div class="overlay" v-if="showApariencia" @click.self="showApariencia = false">
@@ -171,6 +136,7 @@
       </div>
     </div>
   </Teleport>
+
   <!-- Modal acerca de -->
   <Teleport to="body">
     <div class="overlay" v-if="showAcercaDe" @click.self="showAcercaDe = false">
@@ -195,16 +161,19 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/api.js'
-import { temas, aplicarTema } from '../themes.js'
+import { aplicarTema } from '../themes.js'
 
-const router     = useRouter()
-const usuario    = ref(JSON.parse(localStorage.getItem('usuario') || '{}'))
-const showPerfil = ref(false)
-const showSettings  = ref(false)
+const router  = useRouter()
+const usuario = ref(JSON.parse(localStorage.getItem('usuario') || '{}'))
+
+// ── Helper: id del trabajador logueado ────────────────────
+const idTrabajador = () => JSON.parse(localStorage.getItem('usuario') || '{}').id_trabajador ?? null
+
+const showPerfil     = ref(false)
+const showSettings   = ref(false)
 const showApariencia = ref(false)
-const showAcercaDe  = ref(false)
-const settingsRef   = ref(null)
-
+const showAcercaDe   = ref(false)
+const settingsRef    = ref(null)
 
 const nombreUsuario = computed(() => usuario.value.nombre || 'Trabajador')
 const rolLabel      = computed(() => (usuario.value.rol || 'TRABAJADOR').toUpperCase())
@@ -212,45 +181,33 @@ const initials      = computed(() => {
   const p = nombreUsuario.value.trim().split(' ')
   return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase()
 })
-// ── Ajustes ───────────────────────────────────────────────
-function toggleSettings() { showSettings.value = !showSettings.value }
- 
-function abrirApariencia() {
-  showSettings.value  = false
-  showApariencia.value = true
-}
- 
-function abrirAcercaDe() {
-  showSettings.value = false
-  showAcercaDe.value = true
-}
- 
-// Cerrar dropdown al hacer clic fuera
+
+function toggleSettings()  { showSettings.value = !showSettings.value }
+function abrirApariencia() { showSettings.value = false; showApariencia.value = true }
+function abrirAcercaDe()   { showSettings.value = false; showAcercaDe.value  = true }
+function abrirPerfil()     { showPerfil.value = true }
+function logout()          { localStorage.removeItem('usuario'); router.push('/') }
+
 function onClickOutside(e) {
-  if (settingsRef.value && !settingsRef.value.contains(e.target)) {
+  if (settingsRef.value && !settingsRef.value.contains(e.target))
     showSettings.value = false
-  }
 }
+
 // ── Temas ─────────────────────────────────────────────────
-const temaActual = ref(usuario.value.id_gym ?? 1)
- 
+const temaActual = ref(1)
 const temasList = [
-  { id: 1, nombre: 'Naranja',  color: 'linear-gradient(135deg, #ff5c00, #ff8c00)' },
-  { id: 2, nombre: 'Azul',     color: 'linear-gradient(135deg, #00b4d8, #0077b6)' },
-  { id: 3, nombre: 'Morado',   color: 'linear-gradient(135deg, #a855f7, #7c3aed)' },
+  { id: 1, nombre: 'Naranja', color: 'linear-gradient(135deg, #ff5c00, #ff8c00)' },
+  { id: 2, nombre: 'Azul',    color: 'linear-gradient(135deg, #00b4d8, #0077b6)' },
+  { id: 3, nombre: 'Morado',  color: 'linear-gradient(135deg, #a855f7, #7c3aed)' },
 ]
- 
+
 function seleccionarTema(id) {
   temaActual.value = id
   aplicarTema(id)
-  // Guardar preferencia en localStorage
   const u = JSON.parse(localStorage.getItem('usuario') || '{}')
   u.tema = id
   localStorage.setItem('usuario', JSON.stringify(u))
 }
-
-function abrirPerfil() { showPerfil.value = true }
-function logout()      { localStorage.removeItem('usuario'); router.push('/') }
 
 // ── Gym desde BD ──────────────────────────────────────────
 const loadingGym = ref(true)
@@ -258,15 +215,22 @@ const gymInfo    = ref({ nombre: '', ciudad: '', compania: '', activosHoy: 0 })
 const gymWords   = computed(() => gymInfo.value.nombre.trim().split(' ').filter(Boolean))
 
 async function fetchGym() {
-  try { const { data } = await api.get('/gym/info'); gymInfo.value = data }
-  catch { gymInfo.value = { nombre: 'MI GYM', ciudad: '', compania: '', activosHoy: 0 } }
-  finally { loadingGym.value = false }
+  try {
+    const { data } = await api.get('/gym/info', { params: { id_trabajador: idTrabajador() } })
+    gymInfo.value = data
+  } catch {
+    gymInfo.value = { nombre: 'MI GYM', ciudad: '', compania: '', activosHoy: 0 }
+  } finally {
+    loadingGym.value = false
+  }
 }
 
 let gymTimer = null
 async function refreshActivos() {
-  try { const { data } = await api.get('/gym/info'); gymInfo.value.activosHoy = data.activosHoy }
-  catch { /* silencioso */ }
+  try {
+    const { data } = await api.get('/gym/info', { params: { id_trabajador: idTrabajador() } })
+    gymInfo.value.activosHoy = data.activosHoy
+  } catch { /* silencioso */ }
 }
 
 // ── Reloj ─────────────────────────────────────────────────
@@ -282,14 +246,23 @@ function updateClock() {
 }
 
 let clockTimer = null
-onMounted(() => { fetchGym(); updateClock(); clockTimer = setInterval(updateClock, 1_000); gymTimer = setInterval(refreshActivos, 60_000);document.addEventListener('click', onClickOutside)})
-onUnmounted(() => { 
-  clearInterval(clockTimer);
-  clearInterval(gymTimer);
-  document.removeEventListener('click', onClickOutside);   
-  // Aplicar tema guardado si existe
+
+onMounted(() => {
+  // Aplicar tema guardado al montar — AQUÍ, no en onUnmounted
   const u = JSON.parse(localStorage.getItem('usuario') || '{}')
   if (u.tema) { temaActual.value = u.tema; aplicarTema(u.tema) }
+
+  fetchGym()
+  updateClock()
+  clockTimer = setInterval(updateClock, 1_000)
+  gymTimer   = setInterval(refreshActivos, 60_000)
+  document.addEventListener('click', onClickOutside)
+})
+
+onUnmounted(() => {
+  clearInterval(clockTimer)
+  clearInterval(gymTimer)
+  document.removeEventListener('click', onClickOutside)
 })
 </script>
 
