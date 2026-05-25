@@ -190,7 +190,6 @@
             <div class="form-group">
               <label class="form-label">Plan inicial</label>
               <select class="form-input" v-model="form.id_plan">
-                <option value="">Sin plan</option>
                 <option v-for="p in planesActivos" :key="p.id" :value="p.id">{{ p.nombre }} — €{{ p.precio }}</option>
               </select>
             </div>
